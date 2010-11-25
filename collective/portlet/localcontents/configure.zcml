@@ -9,18 +9,11 @@
 
     <genericsetup:registerProfile
        name="default"
-       title="Local contents"
+       title="Local contents portlet"
        directory="profiles/default"
        description="A local navigator for Plone, that shows only contents in current folder"
        provides="Products.GenericSetup.interfaces.EXTENSION"
        />
-
-     <!-- Register the portlet -->
-
-     <!-- If the portlet has no configurable parameters, you can remove
-          the EditForm declaration in localcontents.py and delete
-          the 'editview' attribute from this statement.
-       -->
 
      <plone:portlet
          name="collective.portlet.localcontents.LocalContents"

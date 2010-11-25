@@ -13,6 +13,7 @@ setup(name='collective.portlet.localcontents',
       classifiers=[
         "Framework :: Plone",
         "Programming Language :: Python",
+        "Development Status :: 3 - Alpha",
         ],
       keywords='plone portlet navigation',
       author='RedTurtle Technology',
@@ -29,7 +30,6 @@ setup(name='collective.portlet.localcontents',
       ],
       entry_points="""
       # -*- Entry points: -*-
-
       [z3c.autoinclude.plugin]
       target = plone
       """,

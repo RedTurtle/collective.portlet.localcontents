@@ -1,109 +1,134 @@
-from zope.interface import implements
+# -*- coding: utf-8 -*-
 
+from Acquisition import aq_inner, aq_parent
+from zope.interface import implements
+from zope.component import getUtility
+from zope.component import getMultiAdapter
+from zope import schema
+from zope.formlib import form
 from plone.portlets.interfaces import IPortletDataProvider
 from plone.app.portlets.portlets import base
-
-# TODO: If you define any fields for the portlet configuration schema below
-# do not forget to uncomment the following import
-#from zope import schema
-from zope.formlib import form
-
+from Products.CMFCore.utils import getToolByName
+from Products.ATContentTypes.interface.folder import IATFolder
+from OFS.interfaces import IFolder
+from plone.i18n.normalizer.interfaces import IIDNormalizer
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
-
-# TODO: If you require i18n translation for any of your schema fields below,
-# uncomment the following to import your package MessageFactory
-#from collective.portlet.localcontents import LocalContentsMessageFactory as _
-
+from collective.portlet.localcontents import LocalContentsMessageFactory as _
 
 class ILocalContents(IPortletDataProvider):
-    """A portlet
+    """Browser local subcontents"""
 
-    It inherits from IPortletDataProvider because for this portlet, the
-    data that is being rendered and the portlet assignment itself are the
-    same.
-    """
+    name = schema.TextLine(title=_(u"Portlet title"),
+                                   description=_(u"Choose the title you want to display"),
+                                   required=True)
 
-    # TODO: Add any zope.schema fields here to capture portlet configuration
-    # information. Alternatively, if there are no settings, leave this as an
-    # empty interface - see also notes around the add form and edit form
-    # below.
-
-    # some_field = schema.TextLine(title=_(u"Some field"),
-    #                              description=_(u"A field to use"),
-    #                              required=True)
+    display_when_not_default_page = schema.Bool(title=_(u"label_display_when_not_default_page",
+                                                       default="Show when not using default content view"),
+                                   description=_(u"help_display_when_not_default_page",
+                                                 default=u"Check this to show the portlet also when current location is not "
+                                                         u"using a default content to be view of the folder"),
+                                   required=False)
 
 
 class Assignment(base.Assignment):
-    """Portlet assignment.
-
-    This is what is actually managed through the portlets UI and associated
-    with columns.
-    """
 
     implements(ILocalContents)
 
-    # TODO: Set default values for the configurable parameters here
+    name = u""
 
-    # some_field = u""
-
-    # TODO: Add keyword parameters for configurable parameters here
-    # def __init__(self, some_field=u""):
-    #    self.some_field = some_field
-
-    def __init__(self):
-        pass
+    def __init__(self, name=u"", display_when_not_default_page=False):
+        self.name = name
+        self.display_when_not_default_page = display_when_not_default_page
 
     @property
     def title(self):
-        """This property is used to give the title of the portlet in the
-        "manage portlets" screen.
-        """
-        return "Local contents"
+        return _("Local contents")+": "+ self.name
 
 
 class Renderer(base.Renderer):
-    """Portlet renderer.
-
-    This is registered in configure.zcml. The referenced page template is
-    rendered, and the implicit variable 'view' will refer to an instance
-    of this class. Other methods can be added and referenced in the template.
-    """
-
     render = ViewPageTemplateFile('localcontents.pt')
 
+    # Stolen from ploneview
+    def isFolderOrFolderDefaultPage(self, context, request):
+        context_state = getMultiAdapter((aq_inner(context), request), name=u'plone_context_state')
+        return context_state.is_structural_folder() or context_state.is_default_page()
+
+    @property
+    def available(self):
+        """Available only if we are on ATFolder and if the folder has a default page view
+        (but for this, check the 'display_when_not_default_page' flag)
+        """
+        context = self.context
+        display_when_not_default_page = self.data.display_when_not_default_page
+        folder = self._getFolder()
+
+        if not IATFolder.providedBy(folder):
+            return False
+
+        if not display_when_not_default_page:
+            if context==folder:
+                return False
+
+        return True
+
+    def css_class(self):
+        """Generate a CSS class from the portlet header
+        """
+        name = self.data.name
+        normalizer = getUtility(IIDNormalizer)
+        return "portletLocalContents-%s" % normalizer.normalize(name)
+
+    def _getFolder(self):
+        """Return the containing folder of the current context, or the context itself if it is a folder"""
+        context = self.context
+        request = self.request
+        if IFolder.providedBy(context):
+            folder = context
+        elif self.isFolderOrFolderDefaultPage(context, request):
+            folder = aq_parent(aq_inner(context))
+        else:
+            # don't know how to handle this
+            folder = aq_parent(aq_inner(context))
+        return folder
+
+    @property
+    def isAnon(self):
+        mtool = getToolByName(self.context, 'portal_membership')
+        return mtool.isAnonymousUser()
+
+    def contents(self):
+        """Generate a list of contents of the current location"""
+        context = self.context
+        
+        portal_url = getToolByName(context, 'portal_url')
+        ptool = getToolByName(context, 'plone_utils')
+        metaTypesNotToList = getToolByName(context, 'portal_properties').navtree_properties.metaTypesNotToList;
+
+        folder = self._getFolder()
+        dpage = folder.getProperty('default_page', '')
+        contents = folder.getFolderContents()
+        
+        navElems = []
+        for x in contents:
+            if not x.exclude_from_nav and x.portal_type not in metaTypesNotToList and x.getId!=dpage:
+                navElems.append({'title': x.Title,
+                                 'url': x.getURL(),
+                                 'type': x.portal_type,
+                                 'type_normalized': ptool.normalizeString(x.portal_type),
+                                 'review_state_normalized': ptool.normalizeString(x.review_state),
+                                 'icon': "%s/%s" % (portal_url(), x.getIcon),
+                                 'description': x.Description,
+                                 'current': False # TODO for giving the navTreeCurrentItem class
+                                 })
+        
+        return navElems
 
 class AddForm(base.AddForm):
-    """Portlet add form.
-
-    This is registered in configure.zcml. The form_fields variable tells
-    zope.formlib which fields to display. The create() method actually
-    constructs the assignment that is being added.
-    """
     form_fields = form.Fields(ILocalContents)
 
     def create(self, data):
         return Assignment(**data)
 
 
-# NOTE: If this portlet does not have any configurable parameters, you
-# can use the next AddForm implementation instead of the previous.
-
-# class AddForm(base.NullAddForm):
-#     """Portlet add form.
-#     """
-#     def create(self):
-#         return Assignment()
-
-
-# NOTE: If this portlet does not have any configurable parameters, you
-# can remove the EditForm class definition and delete the editview
-# attribute from the <plone:portlet /> registration in configure.zcml
-
-
 class EditForm(base.EditForm):
-    """Portlet edit form.
-
-    This is registered with configure.zcml. The form_fields variable tells
-    zope.formlib which fields to display.
-    """
     form_fields = form.Fields(ILocalContents)
