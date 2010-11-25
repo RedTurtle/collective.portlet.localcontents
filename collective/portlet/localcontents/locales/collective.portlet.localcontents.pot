@@ -4,7 +4,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2010-11-25 11:15+0000\n"
+"POT-Creation-Date: 2010-11-25 11:28+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI +ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,6 +29,11 @@ msgstr ""
 msgid "Portlet title"
 msgstr ""
 
+#. Default: "A local navigator for Plone, that shows only contents in current folder"
+#: ./profiles/default/portlets.xml
+msgid "description_static_portlet"
+msgstr ""
+
 #. Default: "Check this to show the portlet also when current location is not using a default content to be view of the folder"
 #: ./localcontents.py:27
 msgid "help_display_when_not_default_page"
@@ -37,5 +42,10 @@ msgstr ""
 #. Default: "Show when not using default content view"
 #: ./localcontents.py:25
 msgid "label_display_when_not_default_page"
+msgstr ""
+
+#. Default: "Local contents portlet"
+#: ./profiles/default/portlets.xml
+msgid "title_static_portlet"
 msgstr ""
 

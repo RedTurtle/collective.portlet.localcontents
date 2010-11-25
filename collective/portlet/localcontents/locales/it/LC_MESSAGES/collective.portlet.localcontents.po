@@ -3,7 +3,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: 0.1.0\n"
-"POT-Creation-Date: 2010-11-25 11:15+0000\n"
+"POT-Creation-Date: 2010-11-25 11:28+0000\n"
 "PO-Revision-Date: 2010-11-25 12:15+0000\n"
 "Last-Translator: Luca Fabbri <luca.fabbri@redturtle.it>\n"
 "Language-Team: RedTurtle <sviluppoplone@redturtle.it>\n"
@@ -28,6 +28,11 @@ msgstr "Contenuti locali"
 msgid "Portlet title"
 msgstr "Titolo del riquadro"
 
+#. Default: "A local navigator for Plone, that shows only contents in current folder"
+#: ./profiles/default/portlets.xml
+msgid "description_static_portlet"
+msgstr "Un riquadro di navigazione locale, che mostra solo i contenuti nella cartella corrente"
+
 #. Default: "Check this to show the portlet also when current location is not using a default content to be view of the folder"
 #: ./localcontents.py:27
 msgid "help_display_when_not_default_page"
@@ -37,4 +42,9 @@ msgstr "Seleziona questo per visualizzare la portlet anche quanto il contento co
 #: ./localcontents.py:25
 msgid "label_display_when_not_default_page"
 msgstr "Mostra quando non si usa contenuto come vista"
+
+#. Default: "Local contents portlet"
+#: ./profiles/default/portlets.xml
+msgid "title_static_portlet"
+msgstr "Riquadro contenuti locali"
 

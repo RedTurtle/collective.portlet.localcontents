@@ -42,7 +42,12 @@ class Assignment(base.Assignment):
 
     @property
     def title(self):
-        return _("Local contents")+": "+ self.name
+        return _(u"Local contents")+": "+ self.name
+#        translation_service = getToolByName(context,'translation_service')
+#        return translation_service.utranslate(domain='collective.portlet.localcontents',
+#                                              msgid=u"Local contents",
+#                                              default=u"Local contents",
+#                                              context=context)
 
 
 class Renderer(base.Renderer):
