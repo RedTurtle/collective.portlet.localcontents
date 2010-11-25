@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<portlets>
+
+ <!-- Portlet type registrations -->
+
+ <portlet
+   addview="collective.portlet.localcontents.LocalContents"
+   title="Local contents"
+   description="A local navigator for Plone, that shows only contents in current folder"
+   />
+
+</portlets>
