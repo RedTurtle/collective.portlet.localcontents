@@ -8,6 +8,7 @@ from zope import schema
 from zope.formlib import form
 from plone.portlets.interfaces import IPortletDataProvider
 from plone.app.portlets.portlets import base
+from plone.memoize.instance import memoize
 from Products.CMFCore.utils import getToolByName
 from Products.ATContentTypes.interface.folder import IATFolder
 from OFS.interfaces import IFolder
@@ -70,6 +71,9 @@ class Renderer(base.Renderer):
         if not IATFolder.providedBy(folder):
             return False
 
+        if not self.contents():
+            return False
+
         if not display_when_not_default_page:
             if context==folder:
                 return False
@@ -115,6 +119,7 @@ class Renderer(base.Renderer):
                 return False
         return True
 
+    @memoize
     def contents(self):
         """Generate a list of contents of the current location"""
         context = self.context

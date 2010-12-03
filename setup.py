@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 import os
 
-version = '0.2.0dev'
+version = '0.2.0'
 
 setup(name='collective.portlet.localcontents',
       version=version,
@@ -20,7 +20,7 @@ setup(name='collective.portlet.localcontents',
       keywords='plone portlet navigation',
       author='RedTurtle Technology',
       author_email='sviluppoplone@redturtle.net',
-      url='http://svn.plone.org/svn/collective/collective.portlet.localcontents',
+      url='http://plone.org/products/collective.portlet.localcontents',
       license='GPL',
       packages=find_packages(exclude=['ez_setup']),
       namespace_packages=['collective', 'collective.portlet'],

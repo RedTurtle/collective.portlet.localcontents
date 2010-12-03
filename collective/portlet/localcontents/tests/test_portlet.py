@@ -73,6 +73,16 @@ class TestRenderer(TestCase):
     def afterSetUp(self):
         self.setRoles(('Manager', ))
 
+    def createFolder(self, id, title):
+        self.portal.invokeFactory(id=id, type_name="Folder")
+        self.portal[id].edit(title=title)
+        return self.portal[id]
+
+    def createDocument(self, context, id, title):
+        context.invokeFactory(id=id, type_name="Document")
+        context[id].edit(title=title)
+        return context[id]
+
     def renderer(self, context=None, request=None, view=None, manager=None,
                  assignment=None):
         context = context or self.folder
@@ -86,15 +96,91 @@ class TestRenderer(TestCase):
         return getMultiAdapter((context, request, view, manager, assignment),
                                IPortletRenderer)
 
-    def test_render(self):
-        r = self.renderer(context=self.portal,
+    def updatePortlet(self, context=None):
+        if not context:
+            context=self.portal
+        r = self.renderer(context=context,
                           assignment=localcontents.Assignment(**{'name':'In this section...',
                                                                  'display_when_not_default_page': False}))
-        r = r.__of__(self.folder)
+        r = r.__of__(context)
         r.update()
-        output = r.render()
-        # TODO: Test output
+        return r
 
+    def test_render_basic(self):
+        r = self.updatePortlet()
+        output = r.render()
+        self.assertTrue('In this section...' in output)
+
+    def test_render_defaultpage(self):
+        r = self.updatePortlet()
+        output = r.render()
+        self.assertFalse('front-page' in output)
+        self.portal.setLayout('folder_listing')
+        r = self.updatePortlet()
+        output = r.render()
+        self.assertTrue('front-page' in output)
+
+    def test_render_skip_excludefromnav(self):
+        r = self.updatePortlet()
+        output = r.render()
+        self.assertTrue('Site News' in output)
+        self.portal.news.edit(excludeFromNav=True)
+        r = self.updatePortlet()
+        output = r.render()
+        self.assertFalse('Site News' in output)
+
+    def test_render_test_icons(self):
+        site_properties = self.portal.portal_properties.site_properties
+        # Logged in user see enabled icons
+        r = self.updatePortlet()
+        output = r.render()
+        self.assertTrue('src="http://nohost/plone/folder_icon.gif"' in output)
+        # Logged in user see authenticated icons
+        site_properties.manage_changeProperties(icon_visibility='authenticated')
+        r = self.updatePortlet()
+        output = r.render()
+        self.assertTrue('src="http://nohost/plone/folder_icon.gif"' in output)
+        # Anon user doesn't see authenticated icons
+        self.logout()
+        r = self.updatePortlet()
+        output = r.render()
+        self.assertFalse('src="http://nohost/plone/folder_icon.gif"' in output)
+        # Anon user see enabled icons
+        site_properties.manage_changeProperties(icon_visibility='enabled')
+        r = self.updatePortlet()
+        output = r.render()
+        self.assertTrue('src="http://nohost/plone/folder_icon.gif"' in output)
+        # Anon user doesn't see disabled icons
+        site_properties.manage_changeProperties(icon_visibility='disabled')
+        r = self.updatePortlet()
+        output = r.render()
+        self.assertFalse('src="http://nohost/plone/folder_icon.gif"' in output)
+        # Logged in user doesn't see disabled icons
+        self.loginAsPortalOwner()
+        site_properties.manage_changeProperties(icon_visibility='disabled')
+        r = self.updatePortlet()
+        output = r.render()
+        self.assertFalse('src="http://nohost/plone/folder_icon.gif"' in output)
+
+    def test_render_notshow_defaultpage(self):
+        """Test for a bug in the 0.1 version: must not show the portlet is the current folder has only
+        one child that is the default page
+        """
+        folder = self.createFolder('foo1', 'Foo 1')
+        document = self.createDocument(folder, 'main-page', 'Welcome to my section')
+        r = self.updatePortlet(folder)
+        output = r.render()
+        self.assertTrue('In this section...' in output)
+        self.assertTrue('Welcome to my section' in output)
+        self.assertFalse(r.render.available)
+        #TO-BE finished
+        # this test is not working
+        #folder.setDefaultPage('main-page')
+        #r = self.updatePortlet(document)
+        #output = r.render()
+        #self.assertTrue('In this section...' in output)
+        #self.assertFalse('Welcome to my section' in output)
+        #self.assertFalse(r.render.available)
 
 def test_suite():
     from unittest import TestSuite, makeSuite
