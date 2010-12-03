@@ -101,6 +101,20 @@ class Renderer(base.Renderer):
         mtool = getToolByName(self.context, 'portal_membership')
         return mtool.isAnonymousUser()
 
+    @property
+    def canSeeIcons(self):
+        """Check if the current user can see contents icon"""
+        portal_properties = getToolByName(self.context, 'portal_properties')
+        icon_visibility = portal_properties.site_properties.icon_visibility
+        if icon_visibility=='enabled':
+            return True
+        if icon_visibility=='disabled':
+            return False
+        else: # authenticated
+            if self.isAnon:
+                return False
+        return True
+
     def contents(self):
         """Generate a list of contents of the current location"""
         context = self.context

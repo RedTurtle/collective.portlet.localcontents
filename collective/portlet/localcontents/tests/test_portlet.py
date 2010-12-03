@@ -26,8 +26,7 @@ class TestPortlet(TestCase):
                           'collective.portlet.localcontents.LocalContents')
 
     def test_interfaces(self):
-        # TODO: Pass any keyword arguments to the Assignment constructor
-        portlet = localcontents.Assignment()
+        portlet = localcontents.Assignment(**{'name':'In this section...', 'display_when_not_default_page': False})
         self.failUnless(IPortletAssignment.providedBy(portlet))
         self.failUnless(IPortletDataProvider.providedBy(portlet.data))
 
@@ -41,18 +40,13 @@ class TestPortlet(TestCase):
             del mapping[m]
         addview = mapping.restrictedTraverse('+/' + portlet.addview)
 
-        # TODO: Pass a dictionary containing dummy form inputs from the add
-        # form.
-        # Note: if the portlet has a NullAddForm, simply call
-        # addview() instead of the next line.
-        addview.createAndAdd(data={})
+        addview.createAndAdd(data={'name':'In this section...', 'display_when_not_default_page': False})
 
         self.assertEquals(len(mapping), 1)
         self.failUnless(isinstance(mapping.values()[0],
                                    localcontents.Assignment))
 
     def test_invoke_edit_view(self):
-        # NOTE: This test can be removed if the portlet has no edit form
         mapping = PortletAssignmentMapping()
         request = self.folder.REQUEST
 
@@ -67,8 +61,7 @@ class TestPortlet(TestCase):
         manager = getUtility(IPortletManager, name='plone.rightcolumn',
                              context=self.portal)
 
-        # TODO: Pass any keyword arguments to the Assignment constructor
-        assignment = localcontents.Assignment()
+        assignment = localcontents.Assignment(**{'name':'In this section...', 'display_when_not_default_page': False})
 
         renderer = getMultiAdapter(
             (context, request, view, manager, assignment), IPortletRenderer)
@@ -88,19 +81,18 @@ class TestRenderer(TestCase):
         manager = manager or getUtility(
             IPortletManager, name='plone.rightcolumn', context=self.portal)
 
-        # TODO: Pass any default keyword arguments to the Assignment
-        # constructor.
-        assignment = assignment or localcontents.Assignment()
+        assignment = assignment or localcontents.Assignment(**{'name':'In this section...',
+                                                               'display_when_not_default_page': False})
         return getMultiAdapter((context, request, view, manager, assignment),
                                IPortletRenderer)
 
     def test_render(self):
-        # TODO: Pass any keyword arguments to the Assignment constructor.
         r = self.renderer(context=self.portal,
-                          assignment=localcontents.Assignment())
+                          assignment=localcontents.Assignment(**{'name':'In this section...',
+                                                                 'display_when_not_default_page': False}))
         r = r.__of__(self.folder)
         r.update()
-        #output = r.render()
+        output = r.render()
         # TODO: Test output
 
 

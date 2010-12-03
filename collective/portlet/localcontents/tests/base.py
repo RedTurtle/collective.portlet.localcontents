@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from Products.Five import zcml
 from Products.Five import fiveconfigure
 
@@ -15,21 +17,12 @@ def setup_product():
     until the setup of the Plone site testing layer.
     """
 
-    # Load the ZCML configuration for this package and its dependencies
-
     fiveconfigure.debug_mode = True
     import collective.portlet.localcontents
     zcml.load_config('configure.zcml', collective.portlet.localcontents)
     fiveconfigure.debug_mode = False
 
-    # We need to tell the testing framework that these products
-    # should be available. This can't happen until after we have loaded
-    # the ZCML.
-
     ztc.installPackage('collective.portlet.localcontents')
-
-# The order here is important: We first call the deferred function and then
-# let PloneTestCase install it during Plone site setup
 
 setup_product()
 ptc.setupPloneSite(products=['collective.portlet.localcontents'])

@@ -9,14 +9,18 @@
 
     <dd class="portletItem lastItem">
         
-		<ul class="navTree navTreeLevel0" tal:define="isAnon view/isAnon">
+		<ul class="navTree navTreeLevel0"
+		    tal:define="isAnon view/isAnon;
+		                canSeeIcons view/canSeeIcons">
 			<li class="navTreeItem visualNoMarker" tal:repeat="content view/contents">
 				<div>
 					<a tal:attributes="title content/description;
 					                   href content/url;
 									   class python: not isAnon and 'state-'+ content['review_state_normalized'] or ''">
-            			<img width="16" height="16" tal:attributes="alt content/type;
-						                                            src content/icon">
+            			<img width="16" height="16"
+						     tal:condition="canSeeIcons"
+						     tal:attributes="alt content/type;
+						                     src content/icon">
             			<span tal:content="content/title">Collaboratori</span>
         			</a>
 				</div>

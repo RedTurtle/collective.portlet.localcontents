@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
+
 from setuptools import setup, find_packages
 import os
 
-version = '0.1.0'
+version = '0.2.0dev'
 
 setup(name='collective.portlet.localcontents',
       version=version,
@@ -13,7 +15,7 @@ setup(name='collective.portlet.localcontents',
       classifiers=[
         "Framework :: Plone",
         "Programming Language :: Python",
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         ],
       keywords='plone portlet navigation',
       author='RedTurtle Technology',
