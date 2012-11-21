@@ -14,11 +14,13 @@
 		                canSeeIcons view/canSeeIcons">
 			<li class="navTreeItem visualNoMarker" tal:repeat="content view/contents">
 				<div>
-					<a tal:attributes="title content/description;
+					<a tal:define="item_type content/type_normalized;
+                                   item_type_class python:'contenttype-' + item_type;"
+                       tal:attributes="title content/description;
 					                   href content/url;
-									   class python: not isAnon and 'state-'+ content['review_state_normalized'] or ''">
+									   class python: not isAnon and item_type_class +' state-'+ content['review_state_normalized'] or item_type_class">
             			<img width="16" height="16"
-						     tal:condition="canSeeIcons"
+						     tal:condition="python:canSeeIcons and content.get('icon', '')"
 						     tal:attributes="alt content/type;
 						                     src content/icon">
             			<span tal:content="content/title">Collaboratori</span>

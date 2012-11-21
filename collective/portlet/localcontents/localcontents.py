@@ -123,29 +123,31 @@ class Renderer(base.Renderer):
     def contents(self):
         """Generate a list of contents of the current location"""
         context = self.context
-        
         portal_url = getToolByName(context, 'portal_url')
         ptool = getToolByName(context, 'plone_utils')
-        metaTypesNotToList = getToolByName(context, 'portal_properties').navtree_properties.metaTypesNotToList;
+        metaTypesNotToList = getToolByName(context, 'portal_properties').navtree_properties.metaTypesNotToList
 
         folder = self._getFolder()
         dpage = folder.getProperty('default_page', '')
         contents = folder.getFolderContents()
-        
+
         navElems = []
         for x in contents:
-            if not x.exclude_from_nav and x.portal_type not in metaTypesNotToList and x.getId!=dpage:
-                navElems.append({'title': x.Title,
-                                 'url': x.getURL(),
-                                 'type': x.portal_type,
-                                 'type_normalized': ptool.normalizeString(x.portal_type),
-                                 'review_state_normalized': ptool.normalizeString(x.review_state),
-                                 'icon': "%s/%s" % (portal_url(), x.getIcon),
-                                 'description': x.Description,
-                                 'current': False # TODO for giving the navTreeCurrentItem class
-                                 })
-        
+            if not x.exclude_from_nav and x.portal_type not in metaTypesNotToList and x.getId != dpage:
+                item_dict = {'title': x.Title,
+                             'url': x.getURL(),
+                             'type': x.portal_type,
+                             'type_normalized': ptool.normalizeString(x.portal_type),
+                             'review_state_normalized': ptool.normalizeString(x.review_state),
+                             'description': x.Description,
+                             'current': False # TODO for giving the navTreeCurrentItem class
+                             }
+                if x.getIcon:
+                    item_dict['icon'] = "%s/%s" % (portal_url(), x.getIcon)
+                navElems.append(item_dict)
+
         return navElems
+
 
 class AddForm(base.AddForm):
     form_fields = form.Fields(ILocalContents)
